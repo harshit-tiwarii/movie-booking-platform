@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-// ✨ ADDED: Import useDispatch and the fetchUser action
 import { useDispatch } from "react-redux";
-import { fetchUser } from "../features/user/userSlice";
+import {toast} from "react-toastify";
+import { signupUser } from "../features/user/userSlice";
 
 export default function SignupForm() {
   const navigate = useNavigate();
@@ -33,43 +32,30 @@ export default function SignupForm() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const form = new FormData();
-    form.append("name", formData.name);
-    form.append("email", formData.email);
-    form.append("password", formData.password);
-    form.append("confirmPassword", formData.confirmPassword);
-    if (formData.photo) {
-      form.append("photo", formData.photo);
-    }
+  const form = new FormData();
+  // ... (append all your form data as before) ...
+  form.append("name", formData.name);
+  form.append("email", formData.email);
+  form.append("password", formData.password);
+  form.append("confirmPassword", formData.confirmPassword);
+  if (formData.photo) {
+    form.append("photo", formData.photo);
+  }
 
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/userAuth/signupForm`,
-        form,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
-      );
-
-      console.log("Signup Success ✅", response.data);
-      alert("Signup successful!");
-      
-      // ✨ ADDED: Dispatch fetchUser to update the global state
-      dispatch(fetchUser());
-
+  // 2. Dispatch the thunk and let Redux handle the state
+  dispatch(signupUser(form))
+    .unwrap() // .unwrap() allows you to use .then() and .catch() here
+    .then(() => {
+      toast.success("Signup successful! 🎉");
       navigate("/");
-    } catch (err) {
-      console.error("Signup Failed ❌", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Signup failed.");
-    }
-  };
+    })
+    .catch((errorMessage) => {
+      toast.error(errorMessage);
+    });
+};
 
-  // ... rest of the JSX is unchanged and correct ...
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-purple-500 via-indigo-500 to-blue-400">
       <motion.form

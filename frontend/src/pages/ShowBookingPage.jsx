@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MdOutlineAccessTime, MdArrowForward } from 'react-icons/md';
 import { movieData } from '../assets/QuickShow-assets/assets'; // Adjust if path differs
-import toast from 'react-hot-toast';
+import {toast} from 'react-toastify';
 
 const availableTimings = ['02:30 PM', '01:30 AM', '05:30 PM', '08:30 PM'];
 
@@ -98,10 +98,9 @@ export default function SeatSelectionPage() {
       date,
     };
     console.log("Booking Details:", bookingDetails);
-    // You can navigate to confirmation page with state
-    // navigate('/confirm', { state: bookingDetails });
+    
     if (!movie || selectedSeats.length === 0 || !selectedTime || !date) {
-    toast('Something went wrong, try again');
+    toast.error('Something went wrong, try again');
     return;
   }
     navigate('/mybooking',{state: bookingDetails} );

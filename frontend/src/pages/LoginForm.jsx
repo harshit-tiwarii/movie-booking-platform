@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setUser } from "../features/user/userSlice";
+import { toast } from "react-toastify";
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -45,22 +46,19 @@ export default function LoginForm() {
       );
 
       console.log("Login Success ✅", response.data);
-      alert("Login successful!");
+       toast.success("login successful! 🎉"); 
 
-      // ✨ CRITICAL: Dispatch the user data to the Redux store
-      // This will update the Navbar and the rest of the app.
       const userPayload = {
         ...response.data.user,
         photo: response.data.user.photo.secure_url,
       };
       dispatch(setUser(userPayload));
 
-      // Navigate to the homepage after successful login
       navigate("/");
 
     } catch (err) {
       console.error("Login Failed ❌", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Login failed. Please check your credentials.");
+      toast.error(err.response?.data?.message || "Signup failed.");
     }
   };
 

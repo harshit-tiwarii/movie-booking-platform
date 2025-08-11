@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { setUser } from '../features/user/userSlice'; // We'll use this to update the store
+import {toast} from 'react-toastify'
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -52,13 +53,13 @@ export default function ProfilePage() {
       };
       dispatch(setUser(updatedUser));
 
-      alert('Profile updated successfully!');
+      toast.success("Profile updates successfully!");
       setIsEditing(false);
       setPreviewImage(null);
 
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert(error.response?.data?.message || 'Failed to update profile.');
+      toast.error(error.response?.data?.message || 'Failed to update profile.');
     }
   };
 

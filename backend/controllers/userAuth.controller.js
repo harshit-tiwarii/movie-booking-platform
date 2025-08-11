@@ -49,8 +49,10 @@ const Signup = async (req, res, next) => {
         const cookieOptions = {
             maxAge: 7 * 24 * 60 * 60 * 1000,
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production' ? true : false
-        }
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        };
+
         const token = user.generateJwtToken()
         res.cookie('token', token, cookieOptions)
 
@@ -82,7 +84,8 @@ const Signin = async (req, res, next) => {
         const cookieOptions = {
             maxAge: 7 * 24 * 60 * 60 * 1000,
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production' ? true : false
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
         }
         res.cookie('token', token, cookieOptions)
         user.password = undefined;
@@ -130,56 +133,56 @@ const logout = async (req, res, next) => {
 };
 
 const updateProfile = async (req, res, next) => {
-  try {
-    const userId = req.user._id;
-    const { name } = req.body;
-    const user = await userModel.findById(userId);
+    try {
+        const userId = req.user._id;
+        const { name } = req.body;
+        const user = await userModel.findById(userId);
 
-    if (!user) {
-      return next(new AppError('User not found', 404));
+        if (!user) {
+            return next(new AppError('User not found', 404));
+        }
+
+        if (name) {
+            user.name = name;
+        }
+
+        if (req.file) {
+            // ✅ IMPROVEMENT: Only try to delete if a real public_id exists.
+            // We check that it's not null and doesn't contain an '@' symbol.
+            if (user.photo && user.photo.public_id && !user.photo.public_id.includes('@')) {
+                await cloudinary.v2.uploader.destroy(user.photo.public_id);
+            }
+
+            const result = await cloudinary.v2.uploader.upload(req.file.path, {
+                folder: 'quickshow',
+                width: 250,
+                height: 250,
+                gravity: 'faces',
+                crop: 'fill'
+            });
+
+            if (result) {
+                user.photo.public_id = result.public_id;
+                user.photo.secure_url = result.secure_url;
+            }
+
+            fs.rmSync(req.file.path);
+        }
+
+        await user.save();
+        user.password = undefined;
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            user
+        });
+
+    } catch (error) {
+        // Also log the actual error on the backend for easier debugging
+        console.error("PROFILE UPDATE FAILED:", error);
+        return next(new AppError('Failed to process profile update', 400));
     }
-
-    if (name) {
-      user.name = name;
-    }
-
-    if (req.file) {
-      // ✅ IMPROVEMENT: Only try to delete if a real public_id exists.
-      // We check that it's not null and doesn't contain an '@' symbol.
-      if (user.photo && user.photo.public_id && !user.photo.public_id.includes('@')) {
-        await cloudinary.v2.uploader.destroy(user.photo.public_id);
-      }
-      
-      const result = await cloudinary.v2.uploader.upload(req.file.path, {
-        folder: 'quickshow',
-        width: 250,
-        height: 250,
-        gravity: 'faces',
-        crop: 'fill'
-      });
-
-      if (result) {
-        user.photo.public_id = result.public_id;
-        user.photo.secure_url = result.secure_url;
-      }
-      
-      fs.rmSync(req.file.path);
-    }
-
-    await user.save();
-    user.password = undefined;
-
-    res.status(200).json({
-      success: true,
-      message: 'Profile updated successfully',
-      user
-    });
-
-  } catch (error) {
-    // Also log the actual error on the backend for easier debugging
-    console.error("PROFILE UPDATE FAILED:", error);
-    return next(new AppError('Failed to process profile update', 400));
-  }
 };
 
 export {

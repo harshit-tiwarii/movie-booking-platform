@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import toast from 'react-hot-toast'
+import { toast } from "react-toastify";
 
 /** ✅ Helper function to generate a list of upcoming dates */
 function getDates(startDate, days) {
@@ -41,7 +41,7 @@ export default function BookingDate({ movieId }) {
   const handleBookNow = () => {
     console.log("Movie ID:", movieId);
     if(!selected){
-      return toast('Please select date')
+      return toast.error('Please select date')
     }
     console.log("Date:", selectedDate.toDateString());
     navigate(`/movies/${movieId}/${selectedDate}`)
