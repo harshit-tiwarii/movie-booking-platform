@@ -117,18 +117,21 @@ const getUser = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        res.cookie('token', null, {
-            maxAge: 0,
+        const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production' ? true : false
-        });
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        };
+        res.clearCookie('token', cookieOptions);
 
         res.status(200).json({
             success: true,
             message: 'Logout successful'
-        })
+        });
+
     } catch (error) {
-        return next(new AppError(error.message, 400));
+        console.error("LOGOUT ERROR:", error); 
+        return next(new AppError('An error occurred during logout.', 500));
     }
 };
 

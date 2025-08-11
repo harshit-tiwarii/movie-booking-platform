@@ -2,15 +2,17 @@ import React from "react";
 // Replace with your actual image import or path
 import backgroundImage from "../assets/QuickShow-assets/backgroundImage.png"; 
 // Replace with actual Marvel Studios logo import or URL
-import marvelLogo from "../assets/QuickShow-assets/marvelLogo.svg";  
-import { Navigate, useNavigate } from "react-router-dom";
+import marvelLogo from "../assets/QuickShow-assets/marvelLogo.svg";  
+import { useNavigate } from "react-router-dom"; // Corrected import
 
 export default function Hero() {
-  const Navigate = useNavigate()
+  // CORRECTED: Variable name should be lowercase to be a function call
+  const navigate = useNavigate();
 
   return (
+    // The parent container is mostly fine, but we will adjust its children
     <div
-      className="relative w-full min-h-screen flex flex-col"
+      className="relative w-full min-h-screen flex flex-col justify-center" // Aligns content vertically
       style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
@@ -18,75 +20,74 @@ export default function Hero() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Hero Content */}
-      <div className="flex flex-1 ml-25 items-center pt-28 pb-10 pl-10 pr-5 z-10 max-w-[600px]">
-        <div className="flex flex-col justify-start items-start gap-4">
+      {/* Hero Content Wrapper */}
+      {/* ADJUSTED: Responsive padding for better mobile layout */}
+      <div className="flex z-10 px-6 sm:px-10 md:px-20 max-w-3xl">
+
+        <div className="flex flex-col justify-start items-start gap-3 md:gap-4">
           {/* Marvel Studios Logo */}
+          {/* ADJUSTED: Slightly smaller on mobile */}
           <img
             src={marvelLogo}
             alt="MARVEL STUDIOS"
-            className="h-7 mb-2 select-none"
+            className="h-6 md:h-7 mb-2 select-none"
             draggable={false}
-            style={{ filter: "drop-shadow(0 2px 6px rgba(30,20,0,0.23))" }}
           />
+
           {/* Main Title */}
+          {/* ADJUSTED: Responsive font size */}
           <h1
-            className="text-white font-extrabold text-5xl md:text-6xl tracking-tight mb-3 leading-tight"
+            className="text-white font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight leading-tight"
             style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
           >
-            Guardians <br className="sm:hidden" />
+            Guardians <br className="block sm:hidden" /> {/* This break is good for mobile */}
             of the Galaxy
           </h1>
+
           {/* Movie Info */}
-          <div className="flex flex-row items-center gap-3 text-white/70 text-sm font-medium mb-1">
+          {/* ADJUSTED: Smaller text and gap on mobile */}
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-white/80 text-xs sm:text-sm font-medium">
             <span>Action</span>
-            <span>|</span>
+            <span className="opacity-50">|</span>
             <span>Adventure</span>
-            <span>|</span>
+            <span className="opacity-50">|</span>
             <span>Sci-Fi</span>
-            <span>|</span>
+            <span className="opacity-50">|</span>
             <span className="flex items-center gap-1">
               {/* Calendar Icon */}
-              <svg
-                className="w-[1em] h-[1em] inline-block mr-1"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                viewBox="0 0 24 24"
-              >
-                <rect x="3" y="5" width="18" height="16" rx="2.2" />
-                <path d="M8 3v4M16 3v4" />
+              <svg className="w-[1em] h-[1em] inline-block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="16" rx="2.2" /> <path d="M8 3v4M16 3v4" />
               </svg>
               2018
             </span>
-            <span>|</span>
+            <span className="opacity-50">|</span>
             <span className="flex items-center gap-1">
               {/* Clock Icon */}
-              <svg
-                className="w-[1em] h-[1em] inline-block mr-1"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7v5l3 3" />
+              <svg className="w-[1em] h-[1em] inline-block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" /> <path d="M12 7v5l3 3" />
               </svg>
               2h 8m
             </span>
           </div>
+
           {/* Synopsis */}
-          <p className="text-white opacity-90 font-normal text-base leading-relaxed max-w-xl mb-4" style={{ textShadow: "0 2px 18px rgba(0,0,0,0.18)" }}>
+           {/* ADJUSTED: Smaller text on mobile */}
+          <p className="text-white opacity-90 font-normal text-sm md:text-base leading-relaxed max-w-xl mt-2">
             In a post-apocalyptic world where cities ride on wheels and consume each other to survive, two people meet in London and try to stop a conspiracy.
           </p>
+          
           {/* Call to Action */}
-          <button onClick={()=>{Navigate('/movies')}} className="rounded-full cursor-pointer px-7 py-2 font-semibold text-white bg-gradient-to-r from-pink-400 to-orange-400 shadow-lg hover:from-orange-400 hover:to-pink-400 transition-all duration-200 whitespace-nowrap mt-2 text-base tracking-wide">
+           {/* ADJUSTED: Smaller button on mobile */}
+          <button 
+            onClick={() => { navigate('/movies') }} // CORRECTED: Use lowercase 'navigate'
+            className="rounded-full cursor-pointer px-6 py-2.5 md:px-7 md:py-3 font-semibold text-white bg-gradient-to-r from-pink-400 to-orange-400 shadow-lg hover:from-orange-400 hover:to-pink-400 transition-all duration-200 whitespace-nowrap mt-4 text-sm md:text-base tracking-wide">
             Explore Movies &rarr;
           </button>
         </div>
       </div>
-      {/* Optional: A gentle left-black-fade overlay for better text legibility (uncomment if needed) */}
-      {/* <div className="absolute inset-0 bg-gradient-to-r from-[rgba(10,10,20,0.55)] via-transparent to-transparent pointer-events-none z-0"></div> */}
+      
+      {/* A fade overlay can greatly improve text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent pointer-events-none z-0"></div>
     </div>
   );
 }

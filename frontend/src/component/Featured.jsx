@@ -1,5 +1,4 @@
 import React from "react";
-import ColouredCircle from "./ColouredCircle";
 import { useNavigate } from "react-router-dom";
 import { movieData } from "../assets/QuickShow-assets/assets";
 import MovieCard from "./MovieCard";
@@ -26,7 +25,6 @@ export default function FeaturedSection() {
         className="flex items-center text-gray-300 font-semibold text-base md:text-lg transition-colors select-none cursor-pointer"
         style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
       >
-        <ColouredCircle size="250px" color="bg-purple-400" top="50%" left="70%" />
         View More
         {/* Right Arrow Icon */}
         <svg
