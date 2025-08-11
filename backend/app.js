@@ -11,7 +11,7 @@ import errorMiddleware from './middleware/error.middleware.js'
 app.use(express.json())
 app.use(cors({
     origin: process.env.FRONT_END_URL,
-    credentials: true // 
+    credentials: true 
 }));
 app.use(cookieParser())
 
