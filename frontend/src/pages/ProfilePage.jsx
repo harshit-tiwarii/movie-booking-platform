@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useEffect
 import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { setUser } from '../features/user/userSlice'; // We'll use this to update the store
-import {toast} from 'react-toastify'
+import { setUser } from '../features/user/userSlice';
+import { toast } from 'react-toastify';
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  
+  // --- 1. FIXED: Correctly select from the 'user' slice ---
+  const { user, loading } = useSelector((state) => state.user);
 
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Initialize state with empty values
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: '',
     photo: null,
   });
   const [previewImage, setPreviewImage] = useState(null);
+
+  // --- 2. ADDED: A useEffect to sync local state with Redux state ---
+  // This ensures that when the 'user' object loads, the form is populated.
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        photo: null, // Reset photo on user change
+      });
+      setPreviewImage(user.photo || null); // Also set the initial preview
+    }
+  }, [user]); // This effect runs whenever the 'user' object changes
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, name: e.target.value });
@@ -32,12 +48,23 @@ export default function ProfilePage() {
     e.preventDefault();
     
     const uploadData = new FormData();
-    uploadData.append('name', formData.name);
+    // Only append name if it has changed
+    if (formData.name !== user.name) {
+        uploadData.append('name', formData.name);
+    }
     if (formData.photo) {
       uploadData.append('photo', formData.photo);
     }
 
+    // If no data is being changed, don't make an API call
+    if (!uploadData.has('name') && !uploadData.has('photo')) {
+        toast.info("No changes to update.");
+        setIsEditing(false);
+        return;
+    }
+
     try {
+      // IMPORTANT: Ensure your backend route for updating uses the PUT method
       const response = await axios.put(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/userAuth/update-profile`,
         uploadData,
@@ -47,15 +74,19 @@ export default function ProfilePage() {
         }
       );
 
+      // --- 3. FIXED: More robust way to handle photo URL ---
+      // The server might return a string URL or an object from Cloudinary
+      const newPhotoUrl = response.data.user.photo;
       const updatedUser = {
         ...response.data.user,
-        photo: response.data.user.photo.secure_url,
+        photo: typeof newPhotoUrl === 'object' ? newPhotoUrl.secure_url : newPhotoUrl,
       };
+      
       dispatch(setUser(updatedUser));
 
-      toast.success("Profile updates successfully!");
+      toast.success("Profile updated successfully!");
       setIsEditing(false);
-      setPreviewImage(null);
+      setFormData({ ...formData, photo: null }); // Clear the file input after success
 
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -65,14 +96,25 @@ export default function ProfilePage() {
 
   const handleCancel = () => {
     setIsEditing(false);
+    // Reset form to the current user state from Redux
     setFormData({ name: user?.name || '', photo: null });
-    setPreviewImage(null);
+    setPreviewImage(user?.photo || null);
   };
 
-  if (!user) {
+  // Show a loading message while the initial user fetch is in progress
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <p>Loading profile...</p>
+      </div>
+    );
+  }
+
+  // If loading is finished and there's still no user, they should log in.
+  if (!user) {
+     return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Please log in to view your profile.</p>
       </div>
     );
   }
@@ -87,13 +129,11 @@ export default function ProfilePage() {
       >
         <div className="flex flex-col items-center ">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
-
-          {/* This form is used for both viewing and editing */}
           <form onSubmit={handleUpdateProfile} className="w-full">
             {/* Profile Picture Section */}
             <div className="relative w-32 h-32 mx-auto mb-6">
               <img
-                src={previewImage || user.photo}
+                src={previewImage || 'https://placehold.co/128x128/6366f1/ffffff?text=User'}
                 alt="Profile"
                 className="w-full h-full rounded-full object-cover border-4 border-indigo-500 shadow-md"
               />
@@ -107,7 +147,6 @@ export default function ProfilePage() {
                 </label>
               )}
             </div>
-
             {/* User Info Section */}
             <div className="space-y-4">
               <div>
@@ -131,33 +170,15 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
-
             {/* Action Buttons */}
             <div className="mt-8 flex justify-end space-x-4">
               {isEditing ? (
                 <>
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    Save Changes
-                  </button>
+                  <button type="button" onClick={handleCancel} className="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                  <button type="submit" className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Save Changes</button>
                 </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-                >
-                  Edit Profile
-                </button>
+                <button type="button" onClick={() => setIsEditing(true)} className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit Profile</button>
               )}
             </div>
           </form>
