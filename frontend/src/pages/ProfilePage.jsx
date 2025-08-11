@@ -38,7 +38,7 @@ export default function ProfilePage() {
 
     try {
       const response = await axios.put(
-        'http://localhost:3101/api/v1/userAuth/update-profile',
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/userAuth/update-profile`,
         uploadData,
         {
           withCredentials: true,
@@ -46,7 +46,6 @@ export default function ProfilePage() {
         }
       );
 
-      // Update the user state in Redux with the new user data from the backend
       const updatedUser = {
         ...response.data.user,
         photo: response.data.user.photo.secure_url,

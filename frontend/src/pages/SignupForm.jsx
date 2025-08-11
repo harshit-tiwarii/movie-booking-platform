@@ -46,7 +46,7 @@ export default function SignupForm() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3101/api/v1/userAuth/signupForm",
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/userAuth/signupForm`,
         form,
         {
           headers: {

@@ -37,10 +37,10 @@ export default function LoginForm() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3101/api/v1/userAuth/signinForm", // Your backend login route
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/userAuth/signinForm`, // Your backend login route
         formData, // Sending email and password
         {
-          withCredentials: true, // IMPORTANT: Sends cookies with the request
+          withCredentials: true, 
         }
       );
 
